@@ -1,0 +1,36 @@
+{
+  "name": "egg-inc-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "start": "node scripts/start.mjs",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "demo": "node scripts/start.mjs --demo",
+    "privacy:check": "node scripts/check-release.mjs",
+    "release:zip": "node scripts/package-release.mjs"
+  },
+  "dependencies": {
+    "@fastify/static": "^8.3.0",
+    "chart.js": "^4.5.0",
+    "fastify": "^5.6.0",
+    "protobufjs": "^7.5.4",
+    "vue": "^3.5.22"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10",
+    "vue-tsc": "^3.1.1"
+  },
+  "description": "Local Egg, Inc. farm and co-op dashboard with private SQLite history.",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "license": "SEE LICENSE IN LICENSE"
+}
