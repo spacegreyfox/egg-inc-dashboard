@@ -3,8 +3,10 @@ import { computed } from 'vue';
 import type { Metric } from '../shared/types.ts';
 import { goalMilestones } from './contract-goals.ts';
 import { full, short, percentage, percentText } from './format.ts';
+import MilestoneEta from './MilestoneEta.vue';
+import type { MilestoneEstimate } from './contract-progress.ts';
 
-const props = defineProps<{ goals: number[]; delivered?: Metric; finalGoal?: Metric }>();
+const props = defineProps<{ goals: number[]; delivered?: Metric; finalGoal?: Metric; estimate?: MilestoneEstimate; now: number }>();
 const milestones = computed(() => goalMilestones(props.goals, props.delivered?.value, props.finalGoal?.value));
 const progress = computed(() => percentage(props.delivered?.value, props.finalGoal?.value));
 const flagHeight = computed(() => 40 + Math.max(0, ...milestones.value.map(m => m.level)) * 23);
@@ -29,9 +31,11 @@ const detail = (milestone: Milestone) => `Goal ${milestone.number}: ${full(miles
       <li v-for="milestone in milestones" :key="milestone.number" :class="{reached:milestone.reached,next:milestone.next}" tabindex="0" :aria-label="detail(milestone)">
         <div class="milestone-name"><span>Goal {{milestone.number}}</span><span class="milestone-status"><span aria-hidden="true">{{milestone.reached?'✓':milestone.next?'⚑':'○'}}</span> {{status(milestone)}}</span></div>
         <strong>{{short(milestone.target)}} <small>eggs</small></strong>
+        <MilestoneEta v-if="milestone.next && estimate" :estimate="estimate" :now="now" compact/>
         <span class="milestone-remaining">{{milestone.remaining==null?'Waiting for reported delivery':milestone.reached?'Target delivered':short(milestone.remaining)+' eggs to go'}}</span>
         <span class="milestone-tooltip">{{detail(milestone)}}</span>
       </li>
     </ol>
+    <p v-if="estimate?.state==='complete'" class="all-goals-reached">✓ All goals reached</p>
   </div>
 </template>

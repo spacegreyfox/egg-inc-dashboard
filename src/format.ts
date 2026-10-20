@@ -31,3 +31,18 @@ export function duration(s:number|null|undefined) {
   if(s>=60)return `${Math.floor(s/60)}m ${s%60}s`;
   return `${s}s`;
 }
+
+export function completionTime(at: number, now: number) {
+  const date = new Date(at), today = new Date(now), tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const day = sameDay(date, today) ? 'Today' : sameDay(date, tomorrow) ? 'Tomorrow' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', ...(date.getFullYear() !== today.getFullYear() ? { year: 'numeric' as const } : {}) });
+  return day + ' at ' + date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+export function estimateCountdown(at: number, now: number) {
+  const minutes = Math.max(0, Math.ceil((at - now) / 60000));
+  if (minutes <= 1) return '1 minute';
+  if (minutes < 60) return minutes + 'm';
+  if (minutes < 1440) return Math.floor(minutes / 60) + 'h ' + minutes % 60 + 'm';
+  return Math.floor(minutes / 1440) + 'd ' + Math.floor(minutes % 1440 / 60) + 'h';
+}

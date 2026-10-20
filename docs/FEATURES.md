@@ -21,6 +21,16 @@ History begins when recording starts and is retained indefinitely. Unchanged sou
 
 Contract goal progress includes numbered flags at the actual egg targets. Reached goals turn green, the next goal is gold, and each milestone shows its reported remaining eggs. Hover or focus a flag or goal card for full numbers. Only reported delivered totals unlock milestones.
 
+### Next-milestone estimates and multiple contracts
+
+Overview and Contracts show every active contract as a summary card, ordered by the earliest known deadline; unknown deadlines come last. Each card shows reported egg progress, the next unreached milestone, an estimated countdown and local completion time, the deadline, and the last successful co-op or backup check. Select a card to view its goals, population chart, and members. Selection is keyed by contract run, preserved through refreshes, and reset safely when a run disappears.
+
+The next milestone and separately labeled final-goal estimate share the same calculation: remaining reported eggs divided by the combined reported delivery rate. Completion times are anchored to the reading, not the browser clock. Countdowns do not increase delivered totals or unlock goal flags. Estimates assume the last rate holds; future growth, boosts and player actions are not forecast.
+
+Missing rates/totals/timestamps remain unavailable; zero rates say no progress. An elapsed estimate waits for updated reported progress. Estimates beyond the deadline are labeled accordingly; expired contracts do not show live countdowns. A reading becomes stale after the greater of five minutes or two polling intervals. Failed requests, disconnection or paused collection also stop the live countdown while retaining its absolute last estimate and timestamp. All reported goals reached produces an explicit completion status.
+
+The demo includes four independent synthetic contracts: two producing co-ops, a co-op reporting zero production, and a solo farm awaiting a reported rate.
+
 ### Contract population comparison
 
 Contracts now includes a population chart for your farm (blue circles) and a selected co-op partner (red triangles), with 1-hour, 24-hour, 7-day and 30-day ranges. Both populations are read from the co-op response when supplied. Your earlier backup population history for the same contract run is also included. Solo contracts can show your saved farm before co-op membership exists. Larger co-ops have a partner selector.
