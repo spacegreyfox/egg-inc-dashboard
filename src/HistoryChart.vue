@@ -21,16 +21,12 @@ function render() {
     data: { datasets: datasets.value.map(line => ({
       label: line.label, data: line.data, parsing: false,
       borderColor: line.color, backgroundColor: 'rgba(181,217,139,.065)',
-      fill: !props.series, borderWidth: line.capacityLine ? 1.5 : 2,
-      borderDash: line.capacityLine ? [3, 4] : undefined,
-      stepped: line.capacityLine ? 'after' : false,
-      order: line.capacityLine ? 1 : 0,
-      pointRadius: line.capacityLine ? (line.points.length < 2 ? 3 : 0) : line.points.length < 120 ? 3 : 1,
+      fill: !props.series, borderWidth: 2, pointRadius: line.points.length < 120 ? 3 : 1,
       pointStyle: line.pointStyle ?? 'circle',
       pointBackgroundColor: line.color, pointHoverRadius: 5, pointHitRadius: 8,
       spanGaps: false, tension: 0,
       segment: {
-        borderDash: context => line.data[context.p1DataIndex]?.gapBefore ? [7, 5] : line.capacityLine ? [3, 4] : undefined,
+        borderDash: context => line.data[context.p1DataIndex]?.gapBefore ? [7, 5] : undefined,
       },
     })) },
     options: {
@@ -56,6 +52,6 @@ onBeforeUnmount(() => chart?.destroy());
 </script>
 
 <template>
-  <div class="chart-wrap"><canvas ref="canvas" role="img" :aria-label="`${label} history, ${observations} observations. Lines connect observations within a farm run; dotted lines show recorded habitat capacity when enabled, and longer dashes mark collection gaps. Exact values are available in History.`"></canvas></div>
-  <div class="trend-legend"><template v-if="series"><span v-for="line in lines" :key="line.id"><i :style="{borderColor:line.color}" :class="{gap:line.capacityLine}"></i>{{line.label}}</span></template><span v-else><i></i>Recorded trend</span><span v-if="hasGaps"><i class="gap"></i>Collection gap</span><span class="trend-unit">{{unit}}</span></div>
+  <div class="chart-wrap"><canvas ref="canvas" role="img" :aria-label="`${label} history, ${observations} observations. Lines connect observations within a farm run; dashed lines mark collection gaps. Exact values are available in History.`"></canvas></div>
+  <div class="trend-legend"><template v-if="series"><span v-for="line in lines" :key="line.id"><i :style="{borderColor:line.color}"></i>{{line.label}}</span></template><span v-else><i></i>Recorded trend</span><span v-if="hasGaps"><i class="gap"></i>Collection gap</span><span class="trend-unit">{{unit}}</span></div>
 </template>

@@ -54,7 +54,7 @@ test('member history retains source timestamps and excludes failed co-op reads',
   } finally { store.close(); }
 });
 
-import { capacityLines, populationTracks, populationLines } from '../src/contract-population.ts';
+import { populationTracks, populationLines } from '../src/contract-population.ts';
 import type { HistoryPoint } from '../shared/types.ts';
 
 const reading = (time: number, value: number, segment: string): HistoryPoint => ({ time, collectedAt: time, value, segment, source: 'reported', gap: false });
@@ -109,19 +109,14 @@ test('a solo contract can show the saved farm without a co-op or partner', () =>
   assert.deepEqual(populationTracks(contract, undefined, ''), []);
 });
 
-test('capacity uses matching reported co-op data and preserves capacity changes over time', () => {
+test('population comparison stays at two population series while capacity remains available separately', () => {
   const initial = snapshot(now), contract = initial.contracts[0]!, farm = initial.farms.find(f => f.id !== 'home')!;
   farm.metrics.capacity!.value = 15000000000;
   const tracks = populationTracks(contract, farm, contract.members[1]!.id);
   assert.equal(tracks[0]?.capacity?.value, 12000000000);
-  const histories = {
-    [tracks[0]!.entity]: [reading(now - 4000, 10000000000, contract.segment), reading(now - 1000, 12000000000, contract.segment)],
-    [tracks[1]!.entity]: [reading(now - 4000, 9000000000, 'older-run'), reading(now - 2000, 12000000000, contract.segment)],
-  };
-  const lines = capacityLines(tracks, histories, now - 5000, now);
-  assert.ok(lines.every(line => line.capacityLine && line.id.endsWith(':capacity')));
-  assert.deepEqual(lines[0]!.points.map(p => [p.time, p.value]), [[now - 4000, 10000000000], [now - 1000, 12000000000]]);
-  assert.deepEqual(lines[1]!.points.map(p => [p.time, p.value]), [[now - 2000, 12000000000]]);
-  tracks[1]!.capacity = { ...tracks[1]!.capacity!, value: null };
-  assert.equal(capacityLines(tracks, {}, 0, now)[1]!.points.length, 0);
+  assert.equal(tracks[1]?.capacity?.value, 12000000000);
+  const lines = populationLines(tracks, {}, 0, now);
+  assert.equal(lines.length, 2);
+  assert.deepEqual(lines.map(line => line.points[0]?.value), [11340000000, 11200000000]);
+  assert.ok(lines.every(line => !line.label.includes('capacity')));
 });

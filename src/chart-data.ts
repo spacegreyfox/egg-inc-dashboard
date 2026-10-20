@@ -5,7 +5,6 @@ export interface HistoryLine {
   label: string;
   color: string;
   pointStyle?: 'circle' | 'triangle';
-  capacityLine?: boolean;
   points: HistoryPoint[];
 }
 

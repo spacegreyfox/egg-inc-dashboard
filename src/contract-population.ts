@@ -27,11 +27,6 @@ export function populationTracks(contract: Contract, farm: Farm | undefined, par
   return tracks;
 }
 
-export function capacityLines(tracks: PopulationTrack[], histories: Record<string, HistoryPoint[]>, from: number, to: number): HistoryLine[] {
-  return populationLines(tracks.map(track => ({ ...track, metric: track.capacity })), histories, from, to)
-    .map(line => ({ ...line, id: line.id + ':capacity', label: line.label + ' · hab capacity', capacityLine: true }));
-}
-
 export function populationLines(tracks: PopulationTrack[], histories: Record<string, HistoryPoint[]>, from: number, to: number): HistoryLine[] {
   return tracks.map(track => {
     const origin = track.entity.startsWith('member:') ? 'coop' as const : 'backup' as const;

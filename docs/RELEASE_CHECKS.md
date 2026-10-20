@@ -1,6 +1,6 @@
 # Release verification
 
-For version 1.0.0:
+For version 1.0.1:
 
 - Clean dependency installation completed with the locked dependency tree and Node 24.
 - All 48 automated tests passed, including collection/history, capacity/milestones, and release-privacy checks.
