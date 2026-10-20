@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0
+
+- Added final-goal pace badges, anchored required rates, and finish margins on every contract card and selected detail panel. Amber begins at 90% time use, with stale/paused/offline and deadline states.
+- Added grade-specific milestone rewards without claiming redemption.
+- Added collapsible member production details, per-chicken laying conversion, shipping limits, provenance labels, and sorting with unavailable values last.
+- Fixed narrow-screen table containment and improved goal tooltip placement and keyboard table access.
+- Expanded tests to 65 cases. Existing history is preserved; no migration or additional upstream requests.
+
 ## 1.1.0
 
 - Added shared next-milestone and final-goal ETA calculations, anchored to reported readings, with local completion times and live countdowns.

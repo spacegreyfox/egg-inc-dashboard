@@ -29,10 +29,16 @@ export function normalize(backup: Raw, coops: Map<string, {raw: Raw; checkedAt: 
     const { id,segment } = contractIdentity(local), cached = coops.get(segment), raw = cached?.raw;
     const definition = local.contract ?? metadata.contracts?.contracts?.find((c: Raw) => c.identifier === id) ?? {};
     const grade = definition.gradeSpecs?.find((g: Raw) => g.grade === (raw?.grade ?? local.grade));
-    const goals = (grade?.goals ?? definition.goals ?? []).filter((g:Raw)=>g.type === 1 || g.type == null).map((g: Raw) => num(g.targetAmount)).filter((n:any):n is number=>n!=null);
+    const goalDefinitions = (grade?.goals ?? definition.goals ?? []).filter((g:Raw)=>(g.type === 1 || g.type == null) && num(g.targetAmount)!=null);
+    const goals = goalDefinitions.map((g: Raw) => num(g.targetAmount)!);
+    const goalRewards = goalDefinitions.map((g: Raw) => ({ type: num(g.rewardType), subtype: g.rewardSubType ?? null, amount: g.rewardAmount ?? null }));
     const farm = farms.find((f: any) => f.id === `farm:${id}`);
     const members: Member[] = (raw?.contributors ?? []).map((c: Raw) => {
-      const time = timestamp(c.farmInfo?.timestamp), p = c.productionParams ?? {};
+      const savedTime = timestamp(c.farmInfo?.timestamp);
+      const time = savedTime != null && Number.isFinite(savedTime) && savedTime <= now + 60000 ? savedTime : null, p = c.productionParams ?? {};
+      const positive = (value: any) => value === '' || num(value) == null || num(value)! < 0 ? null : num(value);
+      const elr = positive(p.elr), population = positive(p.farmPopulation);
+      const laying = elr != null && population != null ? elr * population : null;
       return { id: createHash('sha256').update(String(c.uuid ?? c.userId ?? c.userName)).digest('hex').slice(0,16), name: c.userName ?? 'Unnamed farmer', me: c.userId === eid || c.userId === local.coopUserId,
         artifacts: equipment(c.farmInfo?.equippedArtifacts ?? []).items,
         metrics: {
@@ -41,6 +47,9 @@ export function normalize(backup: Raw, coops: Map<string, {raw: Raw; checkedAt: 
           population:metric('Population',p.farmPopulation,'chickens','reported',time),
           capacity:metric('Habitat capacity',p.farmCapacity,'chickens','reported',time),
           tokens:metric('Tokens',c.boostTokens,'tokens','reported',time),
+          layingPerChicken:metric('Laying rate per chicken',elr,'eggs/s/chicken','reported',time),
+          laying:metric('Total laying rate',laying,'eggs/s','calculated',time,'Reported per-chicken laying rate multiplied by reported population.'),
+          shipping:metric('Shipping capacity',positive(p.sr),'eggs/s','reported',time),
         },
       };
     });
@@ -55,7 +64,7 @@ export function normalize(backup: Raw, coops: Map<string, {raw: Raw; checkedAt: 
     const secondsToGoal = total != null && target != null && rate != null && rate > 0 ? Math.max(0,(target-total)/rate) : null;
     return {
       id,segment,name:definition.name ?? id,coop:local.coopIdentifier || null,grade:['—','C','B','A','AA','AAA'][raw?.grade ?? local.grade ?? 0] ?? '—',
-      at:raw ? null : observed, checkedAt:cached?.checkedAt ?? null,endsAt,goals,members,error:errors.get(segment) ?? null,
+      at:raw ? null : observed, checkedAt:cached?.checkedAt ?? null,endsAt,goals,goalRewards,members,error:errors.get(segment) ?? null,
       metrics:{
         delivered:metric('Reported delivered eggs',total,'eggs','reported',observed),
         rate:metric('Reported delivery rate',rate,'eggs/s','reported',observed),

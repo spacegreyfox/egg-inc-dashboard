@@ -46,13 +46,14 @@ Then open http://localhost:8891. The port is local to that computer; it is not a
 
 - Home-farm population, habitat occupancy, actual purchased-upgrade rates, equipped artifacts, and active boosts.
 - All active contracts at once, next-milestone ETAs with local completion times, delivered-egg milestones, and sortable co-op members.
+- Final-goal pace badges, required production rate, finish margin, milestone rewards, and sortable member production bottlenecks.
 - Blue/red population comparisons, recorded habitat capacity, occupancy bars, and **Habs full** badges.
 - Account counters, selectable history ranges, exact saved values, and CSV export.
 - Refresh/pause controls, 60/120/300-second collection, and explicit local-data deletion.
 
 “Live” means checking the latest uploaded game data. The dashboard cannot force a game sync. Reported values and conditional forecasts are labeled separately. Read [features and accuracy limits](docs/FEATURES.md) for details.
 
-![Four synthetic contracts with next-milestone estimates](docs/demo-contracts.png)
+![Synthetic contract pace cards, required rates and milestone estimates](docs/demo-contracts.png)
 
 ## Privacy
 

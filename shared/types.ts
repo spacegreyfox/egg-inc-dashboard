@@ -10,10 +10,11 @@ export interface Farm {
   notes: string[];
 }
 export interface Member { id: string; name: string; me: boolean; metrics: Metrics; artifacts: Equipment[] }
+export interface GoalReward { type: number | null; subtype: string | null; amount: Value }
 export interface Contract {
   id: string; segment: string; name: string; coop: string | null; grade: string;
   at: number | null; checkedAt: number | null; endsAt: number | null;
-  metrics: Metrics; goals: number[]; members: Member[]; error: string | null;
+  metrics: Metrics; goals: number[]; goalRewards?: GoalReward[]; members: Member[]; error: string | null;
 }
 export interface Snapshot { at: number; backupAt: number | null; name: string; stats: Metrics; home: Farm | null; farms: Farm[]; contracts: Contract[]; notes: string[] }
 export interface Status { configured: boolean; maskedEid: string | null; interval: number; paused: boolean; collecting: boolean; lastAttempt: number | null; lastSuccess: number | null; nextPoll: number | null; error: string | null; demo: boolean }

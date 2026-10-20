@@ -58,3 +58,35 @@ export function milestoneEstimate(contract: Contract, context: EstimateContext, 
   if (result.estimatedAt <= context.now) return { ...result, state: 'awaiting', message: 'Awaiting updated progress' };
   return { ...result, state: 'estimate', message: result.afterDeadline ? 'After deadline at current rate' : 'At the last reported rate', live: result.staleReason == null };
 }
+
+export interface ContractPace {
+  state: 'on-track' | 'little-margin' | 'behind' | 'complete' | 'unknown' | 'awaiting' | 'expired';
+  label: string; reason: string | null; lastAssessment: string | null;
+  observedAt: number | null; currentRate: number | null; requiredRate: number | null;
+  marginSeconds: number | null; timeUseRatio: number | null;
+}
+export function contractPace(contract: Contract, context: EstimateContext): ContractPace {
+  const estimate = milestoneEstimate(contract, context, 'final');
+  const currentRate = number(contract.metrics.rate?.value), reading = time(contract.metrics.delivered?.at);
+  const deadline = time(contract.endsAt);
+  const available = deadline != null && reading != null ? (deadline - reading) / 1000 : null;
+  const result: ContractPace = { state: 'unknown', label: 'Pace unknown', reason: null, lastAssessment: null,
+    observedAt: estimate.observedAt, currentRate, requiredRate: null, marginSeconds: null, timeUseRatio: null };
+  if (estimate.state === 'complete') return { ...result, state: 'complete', label: 'All goals reached' };
+  if (available != null && available > 0 && estimate.remaining != null) result.requiredRate = estimate.remaining / available;
+  if (deadline != null && estimate.estimatedAt != null) result.marginSeconds = (deadline - estimate.estimatedAt) / 1000;
+  if (available != null && available > 0 && reading != null && time(contract.metrics.rate?.at) != null && estimate.remaining != null && currentRate != null) {
+    result.timeUseRatio = currentRate > 0 ? (estimate.remaining / currentRate) / available : null;
+    if (currentRate === 0 && estimate.remaining > 0 || result.timeUseRatio != null && result.timeUseRatio > 1) {
+      result.state = 'behind'; result.label = 'Behind pace';
+    } else if (result.timeUseRatio != null && result.timeUseRatio >= .9) {
+      result.state = 'little-margin'; result.label = 'Little margin';
+    } else if (result.timeUseRatio != null) { result.state = 'on-track'; result.label = 'On track to finish'; }
+  }
+  if (deadline != null && deadline <= context.now) return { ...result, state: 'expired', label: 'Deadline passed' };
+  const lastAssessment = result.state !== 'unknown' ? result.label : null;
+  if (estimate.state === 'awaiting') return { ...result, state: 'awaiting', label: 'Awaiting updated progress', reason: estimate.staleReason, lastAssessment };
+  if (estimate.staleReason) return { ...result, state: 'unknown', label: 'Pace unknown', reason: estimate.staleReason, lastAssessment };
+  if (result.state === 'unknown') result.reason = deadline == null ? 'Contract deadline unavailable' : available == null ? 'Observation timestamp unavailable' : estimate.message;
+  return result;
+}

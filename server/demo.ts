@@ -26,7 +26,7 @@ export function makeDemoBackup(now = Date.now()): Raw {
   backup.contracts.contracts = demoContracts.map((definition, index) => ({
     ...structuredClone(local),
     contract: { ...structuredClone(local.contract), identifier: definition.id, name: definition.name,
-      gradeSpecs: [{ ...structuredClone(local.contract.gradeSpecs[0]), goals: definition.goals.map(targetAmount => ({ type: 1, targetAmount })) }] },
+      gradeSpecs: [{ ...structuredClone(local.contract.gradeSpecs[0]), goals: definition.goals.map((targetAmount, i) => ({ type: 1, targetAmount, rewardType: [2,4,9][i], rewardAmount: [25000,2,3][i], ...(i===2?{rewardSubType:"boost_beacon_orange"}:{}) })) }] },
     coopIdentifier: definition.coop, timeAccepted: 1700000000 + index * 100,
     coopSimulationEndTime: definition.duration == null ? undefined : now / 1000 + definition.duration,
   }));
@@ -39,10 +39,17 @@ export function makeDemoCoop(id: string, now = Date.now()): Raw {
   raw.secondsRemaining = definition.duration;
   if (id === 'sunrise-shift-demo') {
     raw.totalAmount = 6e14;
-    raw.contributors.forEach((member: Raw, index: number) => { member.contributionRate = 5e10 / 3; member.contributionAmount = 2e14; member.productionParams.farmPopulation = 6000000000; if (index) member.userName = ['','Dawn','Sunny'][index]; });
+    raw.contributors.forEach((member: Raw, index: number) => { member.contributionRate = (5e16 - 6e14) / (43200 * .95) / 3; member.contributionAmount = 2e14; member.productionParams.farmPopulation = 6000000000; if (index) member.userName = ['','Dawn','Sunny'][index]; });
   } else if (id === 'quiet-harbor-demo') {
     raw.totalAmount = 1e15; raw.contributors.forEach((member: Raw, index: number) => { member.contributionRate = 0; member.contributionAmount = 1e15 / 3; if (index) member.userName = ['','Sailor','Pebble'][index]; });
   }
+  raw.contributors.forEach((member: Raw, index: number) => {
+    const population = member.productionParams.farmPopulation;
+    const rate = member.contributionRate;
+    member.productionParams.elr = rate / population;
+    member.productionParams.sr = rate * (index===0 ? .8 : index===1 ? 1.2 : 1);
+    if (index===2) delete member.productionParams.sr;
+  });
   return raw;
 }
 export class DemoClient implements EggClient {

@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Metric } from '../shared/types.ts';
+import type { Metric, GoalReward } from '../shared/types.ts';
 import { goalMilestones } from './contract-goals.ts';
 import { full, short, percentage, percentText } from './format.ts';
 import MilestoneEta from './MilestoneEta.vue';
+import { rewardText } from './rewards.ts';
 import type { MilestoneEstimate } from './contract-progress.ts';
 
-const props = defineProps<{ goals: number[]; delivered?: Metric; finalGoal?: Metric; estimate?: MilestoneEstimate; now: number }>();
+const props = defineProps<{ goals: number[]; rewards?: GoalReward[]; delivered?: Metric; finalGoal?: Metric; estimate?: MilestoneEstimate; now: number }>();
 const milestones = computed(() => goalMilestones(props.goals, props.delivered?.value, props.finalGoal?.value));
 const progress = computed(() => percentage(props.delivered?.value, props.finalGoal?.value));
 const flagHeight = computed(() => 40 + Math.max(0, ...milestones.value.map(m => m.level)) * 23);
 type Milestone = ReturnType<typeof goalMilestones>[number];
 const status = (milestone: Milestone) => milestone.reached == null ? 'Progress unavailable' : milestone.reached ? 'Reached' : milestone.next ? 'Next milestone' : 'Upcoming';
-const detail = (milestone: Milestone) => `Goal ${milestone.number}: ${full(milestone.target)} eggs. ${status(milestone)}.${milestone.remaining == null ? '' : ` ${full(milestone.remaining)} eggs to go.`}`;
+const detail = (milestone: Milestone) => `Goal ${milestone.number}: ${full(milestone.target)} eggs. ${status(milestone)}. ${rewardText(props.rewards?.[milestone.number-1],true)}.${milestone.remaining == null ? '' : ` ${full(milestone.remaining)} eggs to go.`}`;
 </script>
 
 <template>
@@ -23,7 +24,7 @@ const detail = (milestone: Milestone) => `Goal ${milestone.number}: ${full(miles
       <template v-for="milestone in milestones" :key="milestone.number">
         <button v-if="milestone.position!=null" type="button" class="goal-flag" :class="{reached:milestone.reached,next:milestone.next}" :style="{left:milestone.position+'%',height:(35+milestone.level*23)+'px'}" :aria-label="detail(milestone)">
           <span class="goal-pole" aria-hidden="true"></span><span class="goal-pennant" aria-hidden="true">{{milestone.number}}</span>
-          <span class="milestone-tooltip" :class="{edgeStart:milestone.position<20,edgeEnd:milestone.position>80}">{{detail(milestone)}}</span>
+          <span class="milestone-tooltip" :class="{edgeStart:milestone.position<35,edgeEnd:milestone.position>65}">{{detail(milestone)}}</span>
         </button>
       </template>
     </div>
@@ -31,6 +32,7 @@ const detail = (milestone: Milestone) => `Goal ${milestone.number}: ${full(miles
       <li v-for="milestone in milestones" :key="milestone.number" :class="{reached:milestone.reached,next:milestone.next}" tabindex="0" :aria-label="detail(milestone)">
         <div class="milestone-name"><span>Goal {{milestone.number}}</span><span class="milestone-status"><span aria-hidden="true">{{milestone.reached?'✓':milestone.next?'⚑':'○'}}</span> {{status(milestone)}}</span></div>
         <strong>{{short(milestone.target)}} <small>eggs</small></strong>
+        <span class="milestone-reward" :title="rewardText(rewards?.[milestone.number-1],true)">Reward: {{rewardText(rewards?.[milestone.number-1])}}</span>
         <MilestoneEta v-if="milestone.next && estimate" :estimate="estimate" :now="now" compact/>
         <span class="milestone-remaining">{{milestone.remaining==null?'Waiting for reported delivery':milestone.reached?'Target delivered':short(milestone.remaining)+' eggs to go'}}</span>
         <span class="milestone-tooltip">{{detail(milestone)}}</span>

@@ -31,6 +31,20 @@ Missing rates/totals/timestamps remain unavailable; zero rates say no progress. 
 
 The demo includes four independent synthetic contracts: two producing co-ops, a co-op reporting zero production, and a solo farm awaiting a reported rate.
 
+### Contract pace, rewards and production
+
+Every contract card and the selected final-goal panel assesses the **final goal**, separately from the next-milestone ETA. Required rate is remaining reported eggs divided by the time from the reading to the deadline. Current and required rates are shown in eggs/hour. Finish margin is the deadline minus the existing anchored final-goal estimate.
+
+“On track to finish” means estimated production time uses less than 90% of the time available at the reading. “Little margin” covers 90% through 100%, including exact deadline completion. “Behind pace” means more than 100%, or a zero reported rate with eggs remaining. Comparisons use unrounded values; the displayed required rate does not drift upward against unchanged totals. All reported goals reached is authoritative. These are constant-rate estimates, not promises about future growth, boosts, silo supply or player actions.
+
+Paused, disconnected, stale or failed collection shows “Pace unknown,” retaining the last assessment, margin and reading time. Passed estimates await updated progress; expired contracts show “Deadline passed.” Missing rates, totals, timestamps or deadlines explain unavailable assessments. Collection/check timestamps are distinct from member farm timestamps.
+
+Milestone cards display the grade-specific reward amount and category, plus a recognized boost or epic-research subtype. Unknown reward types/subtypes are labeled conservatively. Reached goals never imply that the reward was claimed.
+
+The collapsible Production details panel compares each member’s laying rate and shipping capacity in eggs/hour. Total laying is the API’s per-chicken `elr` multiplied by its reported farm population; shipping comes from `sr`. The lower rate identifies the limiting factor, with separate states for zero and missing production. Calculated laying is labeled separately from reported shipping; neither replaces the authoritative reported delivery rate. See [Co-op Tracker’s field interpretation](https://github.com/wasmegg-carpet/egg/blob/main/eicoop/src/lib/coop.ts). Farm timestamps remain unavailable when missing, nonpositive, or more than one minute in the future; check time is shown separately. Both columns sort in either direction with unavailable values last. The table scrolls within its panel on narrow screens.
+
+New optional metrics use the existing snapshot/history format without migration or additional upstream requests. Older history stays missing for fields not collected at the time; it is never backfilled from current capacity. Offline-production and full-hab scenarios, contribution shares, Soul Mirror estimates and score/season dashboards remain outside this release.
+
 ### Contract population comparison
 
 Contracts now includes a population chart for your farm (blue circles) and a selected co-op partner (red triangles), with 1-hour, 24-hour, 7-day and 30-day ranges. Both populations are read from the co-op response when supplied. Your earlier backup population history for the same contract run is also included. Solo contracts can show your saved farm before co-op membership exists. Larger co-ops have a partner selector.
